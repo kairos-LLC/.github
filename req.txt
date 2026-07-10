@@ -1,0 +1,168 @@
+KAIROS LLC — BASELINE PROJECT REQUIREMENTS & CONVENTIONS
+==========================================================
+
+Audience: human contributors AND AI agents working anywhere in the Kairos
+polyrepo. If you are an AI agent picking up a task in any of the three
+repositories below, read this file first — it is the fastest path to not
+breaking the project's naming conventions or privacy model.
+
+This is a plain-text conventions reference, not a Python requirements file
+(no pip/package meaning is implied by the .txt extension).
+
+For system design and data flow, see ARCHITECTURE.md (expected in the
+`.website` repository; being authored concurrently — if it does not exist
+yet on your branch, treat this file as the interim source of truth for
+vocabulary and repo boundaries, and check ARCHITECTURE.md again before
+assuming it's still missing).
+
+For contribution workflow (branch naming, PR conventions, code review),
+see CONTRIBUTING.md in this repository. For behavioral standards, see
+CODE_OF_CONDUCT.md in this repository.
+
+
+1. THE THREE-REPOSITORY STRUCTURE
+----------------------------------
+
+The Kairos LLC GitHub organization is split into three repositories.
+Know which one you're in before you touch anything:
+
+  .website  — Next.js web application (marketing site + web client),
+              Supabase backend (Postgres schema, migrations, Row Level
+              Security policies, realtime config). Server-side and
+              browser-facing logic lives here. This is the canonical
+              source for the database schema described in section 2.
+
+  .swift    — Native iOS application written in Swift. Contains the
+              on-device schedule engine (FireScheduleEngine.swift) and
+              on-device recovery key handling (RecoveryManager.swift).
+              DO NOT read, open, or modify this repository unless your
+              assigned task explicitly targets it — it is out of scope
+              for most polyrepo-wide work (governance docs, web/backend
+              units, etc.) and is called out here so agents don't wander
+              into it by default.
+
+  .github   — Org-level governance and community health files (this
+              repository): CONTRIBUTING.md, CODE_OF_CONDUCT.md, this
+              req.txt, shared GitHub Actions workflow templates, and the
+              org profile README.
+
+The `.website` and `.swift` repositories independently implement
+overlapping domain concepts (see section 2) and deliberately mirror each
+other's naming where practical, so that a schedule_pattern in Postgres
+means the same thing as a SchedulePattern in Swift. They are not code-
+shared; the mirroring is a naming/semantics discipline, not a shared
+library. When working in `.website`, comments that reference Swift-side
+names (e.g. "mirrors FireScheduleEngine.swift") are for naming
+consistency only — they do not imply the Swift file was read or modified
+as part of that work, and they should not be treated as an invitation to
+open `.swift`.
+
+
+2. DOMAIN VOCABULARY
+----------------------------------
+
+These terms have a specific, load-bearing meaning in Kairos. Use them
+consistently; don't invent synonyms.
+
+  schedule pattern (schedule_patterns table / Swift SchedulePattern)
+      A named, described, reusable definition of a recurring shift cycle,
+      owned by a user. Optionally associated with a job role. A pattern's
+      cycle is the ordered sequence of its shift segments.
+
+  shift segment (shift_segments table / Swift ShiftSegment)
+      One "on" (working) or "off" unit within a schedule pattern's
+      repeating cycle, with a duration in whole hours. Segments are
+      ordered within a pattern by a zero-based sequence index; the full
+      ordered sequence of a pattern's segments is its "cycle" — e.g. a
+      firefighter "48/96" pattern is a cycle of on/off segments.
+
+  override (overrides table / Swift override concept)
+      A one-off exception that applies to a single calendar date for a
+      user's schedule, overriding what the pattern's cycle would
+      otherwise indicate for that date. Override type is one of:
+        - vacation
+        - extra_shift
+        - on_call
+      At most one override per type per date per user/pattern.
+
+  job role (job_role enum / Swift job role concept)
+      An optional classification on a user and/or a schedule pattern,
+      selecting which industry's shift conventions apply. Current values:
+      firefighter, medical, lawEnforcement, industrial, transportation,
+      hospitality. Used to pick default schedule pattern conventions, not
+      as an access-control or employment concept.
+
+  shared schedule (shared_schedules table)
+      The "publish" boundary for a user's schedule: snapshots which
+      schedule pattern is shared and the cycle's start date (cycle_start_
+      date — the calendar date at which the pattern's cycle begins,
+      i.e. sequence_index = 0). Overrides are NOT copied into a shared
+      schedule; they are read live from the overrides table at view time,
+      so viewers always see current vacations/extra shifts/on-calls. A
+      shared schedule can be deactivated (is_active = false) without
+      deleting it, preserving history/audit trail.
+
+  access code (access_codes table)
+      A 6-character single-use alphanumeric code that grants a viewer
+      access to one shared schedule. Redeeming a code sets is_used = true
+      so it cannot be redeemed again; codes also carry an expires_at
+      bound. This is the mechanism behind "share your schedule with
+      one-time codes" — no persistent account linking is required to
+      grant someone visibility into your availability.
+
+  recovery key
+      The core identity primitive of Kairos, replacing traditional email/
+      password accounts. A user is identified by possession of a recovery
+      key. The server never stores the recovery key itself or any
+      recoverable form of it — only users.recovery_key_hash, a one-way
+      hash used solely to look up a user's row. The recovery key / backup
+      payload used to restore access on a new device is generated,
+      encrypted, and decrypted entirely client-side (mirrors the Swift
+      RecoveryManager concept). There is deliberately no server-side
+      table for recoverable recovery data — see section 3.
+
+
+3. PROPRIETARY LICENSING STANCE
+----------------------------------
+
+Kairos is closed-source, proprietary software owned by Kairos LLC. The
+`.website` and `.swift` repositories carry an all-rights-reserved LICENSE:
+no part of this codebase may be copied, modified, distributed,
+sublicensed, or used to create derivative works without Kairos LLC's
+prior written permission.
+
+Practical implications for contributors and agents:
+
+  - CONTRIBUTING.md in this repository is an INTERNAL workflow guide for
+    authorized contributors, not an open-source contribution invitation.
+    Do not describe this project as open source in any documentation,
+    commit message, or PR description.
+  - Do not copy code, assets, or substantial text from external
+    open-source projects into any Kairos repository without confirming
+    license compatibility first — "all rights reserved" cuts both ways.
+  - Do not publish, mirror, or paste Kairos source code, schema, or
+    proprietary business content (e.g. financial worksheets) into public
+    locations (public gists, public forums, third-party SaaS tools
+    without a data agreement, etc.).
+  - The privacy model (recovery keys, hashed-only server storage, no
+    email/password accounts, client-side encrypted recovery data) is a
+    product requirement, not just an implementation detail. Changes that
+    would require the server to store recoverable secret material, or
+    that reintroduce traditional account fields (email, username,
+    password, password_hash, phone_number) to the identity model, should
+    be treated as a design decision requiring explicit sign-off, not a
+    routine change.
+
+
+4. WHERE TO GO NEXT
+----------------------------------
+
+  - System design, data flow, and architectural decisions:
+    ARCHITECTURE.md (expected in `.website`; may be in progress).
+  - Contribution workflow, branch naming, PR conventions, review
+    expectations: CONTRIBUTING.md (this repository).
+  - Expected standards of behavior and enforcement process:
+    CODE_OF_CONDUCT.md (this repository).
+  - Database schema ground truth: `.website/supabase/migrations/`
+    (0001_init.sql for the schema, 0002_rls.sql for Row Level Security
+    policies, 0003_realtime.sql for realtime configuration).
