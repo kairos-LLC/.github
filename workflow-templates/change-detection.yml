@@ -1,0 +1,219 @@
+name: Change Detection
+
+# ---------------------------------------------------------------------------
+# Kairos LLC — org-wide change-detection template
+# ---------------------------------------------------------------------------
+# WHAT THIS IS
+#   A path-filtering gate you drop in front of expensive jobs (build, test,
+#   lint, deploy) so that a repo only pays for what actually changed. It
+#   wraps dorny/paths-filter (https://github.com/dorny/paths-filter) and
+#   exposes each filter's match result as a job output that downstream jobs
+#   read via `needs.detect-changes.outputs.<name>`.
+#
+# WHY A TEMPLATE INSTEAD OF ONE-OFF WORKFLOWS
+#   Kairos has multiple polyrepos (.website, .swift, future services) with
+#   different directory layouts. Rather than duplicating path-filter logic
+#   in every repo, this file ships two ways to reuse it — pick whichever
+#   fits the consuming repo:
+#
+#   OPTION A — Reusable workflow (recommended, DRY, centrally maintained)
+#     Call this workflow directly from a consuming repo's own workflow via
+#     `uses:`, passing your repo's path filters as YAML through the
+#     `filters` input. Kairos org policy changes (e.g. swapping the pinned
+#     action version) then only need to happen here, once.
+#
+#     Example caller workflow in a consuming repo
+#     (.github/workflows/ci.yml):
+#
+#       name: CI
+#       on:
+#         pull_request:
+#         push:
+#           branches: [main]
+#
+#       jobs:
+#         detect-changes:
+#           uses: Kairos-LLC/.github/workflow-templates/change-detection.yml@main
+#           with:
+#             filters: |
+#               app:
+#                 - 'app/**'
+#                 - 'lib/**'
+#                 - 'package*.json'
+#               docs:
+#                 - 'docs/**'
+#                 - '**/*.md'
+#               ci:
+#                 - '.github/workflows/**'
+#
+#         build-and-test:
+#           needs: detect-changes
+#           if: needs.detect-changes.outputs.app == 'true'
+#           runs-on: ubuntu-latest
+#           steps:
+#             - uses: actions/checkout@v4
+#             - run: echo "Run your real build/test steps here"
+#
+#         docs-lint:
+#           needs: detect-changes
+#           if: needs.detect-changes.outputs.docs == 'true'
+#           runs-on: ubuntu-latest
+#           steps:
+#             - uses: actions/checkout@v4
+#             - run: echo "Run a docs linter here"
+#
+#   OPTION B — Copy-and-adapt starter (use when a repo needs filters that
+#     aren't expressible as simple YAML input, e.g. custom `paths-filter`
+#     options per group, or the repo can't call cross-repo reusable
+#     workflows for policy reasons). Use this file, via GitHub's
+#     "Actions -> New workflow" org template picker, as the seed — then
+#     edit the `filters` step below to match the repo's own top-level
+#     directories (app/**, lib/**, docs/**, etc.) and wire the
+#     `if: needs.detect-changes.outputs.<name> == 'true'` guard onto each
+#     downstream job exactly as shown in Option A.
+#
+# HOW TO EXTEND THE FILTER SET
+#   Add a new top-level key under `filters` (either in the `with.filters`
+#   input when calling this as a reusable workflow, or in the default
+#   filters below when copying this file standalone). Each key becomes:
+#     - a job output: outputs.<key> == 'true' | 'false'
+#     - a changed-files list: outputs.<key>_files (space-delimited)
+#   Give every downstream job a `needs: detect-changes` + matching `if:`
+#   so it's skipped entirely (not just fast-failed) when unrelated paths
+#   change. For a job that must run on every push regardless of what
+#   changed (e.g. a required status check that can't be conditionally
+#   skipped), simply omit the `if:` guard on that job — do not add it to
+#   the `filters` map, since paths-filter groups are meant to be mutually
+#   optional, not "run always."
+# ---------------------------------------------------------------------------
+
+on:
+  # Reusable workflow entry point — this is what a consuming repo's
+  # workflow calls via `uses: Kairos-LLC/.github/workflow-templates/change-detection.yml@main`.
+  workflow_call:
+    inputs:
+      filters:
+        description: >
+          YAML (as a string) describing named path-filter groups, in the
+          format consumed by dorny/paths-filter's `filters` input. See the
+          Option A example above. If omitted, a generic default (app/lib
+          vs. docs vs. ci) is used so this workflow is still useful
+          out-of-the-box for a repo that hasn't customized it yet.
+        required: false
+        type: string
+        default: |
+          app:
+            - 'app/**'
+            - 'lib/**'
+            - 'src/**'
+            - 'package*.json'
+            - 'requirements*.txt'
+            - 'Gemfile*'
+            - '*.gemspec'
+          docs:
+            - 'docs/**'
+            - '**/*.md'
+          ci:
+            - '.github/workflows/**'
+            - '.github/actions/**'
+      base:
+        description: >
+          Git ref to diff against when the triggering event has no natural
+          base (e.g. a push to a branch). Passed through to paths-filter's
+          `base` input. Defaults to the repo's default branch.
+        required: false
+        type: string
+        default: ''
+    outputs:
+      app:
+        description: "true if paths matching the 'app' filter group changed"
+        value: ${{ jobs.detect-changes.outputs.app }}
+      app_files:
+        description: "space-delimited list of changed files matching the 'app' filter group"
+        value: ${{ jobs.detect-changes.outputs.app_files }}
+      docs:
+        description: "true if paths matching the 'docs' filter group changed"
+        value: ${{ jobs.detect-changes.outputs.docs }}
+      docs_files:
+        description: "space-delimited list of changed files matching the 'docs' filter group"
+        value: ${{ jobs.detect-changes.outputs.docs_files }}
+      ci:
+        description: "true if paths matching the 'ci' filter group changed"
+        value: ${{ jobs.detect-changes.outputs.ci }}
+      ci_files:
+        description: "space-delimited list of changed files matching the 'ci' filter group"
+        value: ${{ jobs.detect-changes.outputs.ci_files }}
+
+  # Also directly triggerable / testable in this repo (kairos-LLC/.github)
+  # on PRs that touch the template itself, so a bad edit here fails CI
+  # before any consuming repo picks it up.
+  pull_request:
+    paths:
+      - 'workflow-templates/change-detection.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  detect-changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    # dorny/paths-filter reads job outputs from its own step outputs;
+    # re-expose them at the job level so both reusable-workflow callers
+    # (via `needs.detect-changes.outputs.*`) and same-workflow jobs can
+    # consume them the same way.
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+      app_files: ${{ steps.filter.outputs.app_files }}
+      docs: ${{ steps.filter.outputs.docs }}
+      docs_files: ${{ steps.filter.outputs.docs_files }}
+      ci: ${{ steps.filter.outputs.ci }}
+      ci_files: ${{ steps.filter.outputs.ci_files }}
+    steps:
+      # paths-filter can usually answer from PR metadata alone, but a
+      # checkout is required for push events / workflow_dispatch where it
+      # needs local git history to diff against `base`.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Filter changed paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          base: ${{ inputs.base }}
+          list-files: shell
+          filters: ${{ inputs.filters }}
+
+      - name: Summary
+        run: |
+          echo "### Change detection results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Filter | Changed |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|---------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| app | ${{ steps.filter.outputs.app }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| docs | ${{ steps.filter.outputs.docs }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| ci | ${{ steps.filter.outputs.ci }} |" >> "$GITHUB_STEP_SUMMARY"
+
+  # Example consumer job, included so this template is a working,
+  # self-demonstrating example when run standalone in this repo (it will
+  # only actually do anything on a PR that touches this workflow file, per
+  # the `pull_request.paths` trigger above). Delete this job when
+  # copy-adapting into a real product repo — it's illustrative only.
+  example-build-and-test:
+    name: Example — build & test (skipped unless app/** changed)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.app == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "app/lib/src changed — this is where a real repo would run its build+test steps."
+
+  example-docs-check:
+    name: Example — docs check (skipped unless docs/** changed)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "docs changed — this is where a real repo would run a docs linter/spellcheck."

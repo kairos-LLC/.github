@@ -1,0 +1,9 @@
+{
+    "name": "Kairos Change Detection",
+    "description": "Path-filters a repo's diff (via dorny/paths-filter) and exposes named job outputs so downstream build/test/docs jobs can be skipped when unrelated paths change. Parameterized for reuse across Kairos polyrepos (.website, .swift, and future services) — copy and adjust the default filters, or call it directly as a reusable workflow.",
+    "iconName": "octicon git-branch",
+    "categories": [
+        "continuous-integration",
+        "utilities"
+    ]
+}
