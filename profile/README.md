@@ -1,156 +1,82 @@
+<p align="center">
+  <h1 align="center">⏱ Kairos</h1>
+  <p align="center">
+    <strong>Taking the guesswork out of shift work.</strong>
+  </p>
+  <p align="center">
+    A premium iOS, iPadOS &amp; watchOS app for shift workers to track rotating schedules, share them with coworkers, and never miss a shift again.
+  </p>
+  <p align="center">
+    <a href="https://kairosapp.dev"><img src="https://img.shields.io/badge/Web-kairosapp.dev-orange?logo=safari" alt="Website" /></a>
+    <img src="https://img.shields.io/badge/Swift-5.0-orange?logo=swift" alt="Swift 5.0" />
+    <img src="https://img.shields.io/badge/iOS-26.5+-blue?logo=apple" alt="iOS 26.5+" />
+    <img src="https://img.shields.io/badge/watchOS-Companion-green?logo=apple" alt="watchOS" />
+    <img src="https://img.shields.io/badge/WidgetKit-Home%20Screen-purple?logo=apple" alt="WidgetKit" />
+  </p>
+</p>
 
-Conversation with Gemini
-Turn the following into a good README file: Kairos: Architecture and Organization Profile
+---
 
-Kairos is a modern software company building a cross-platform digital product ecosystem. By separating their codebase into distinct, purpose-built repositories, the engineering team has established a modular, scalable architecture utilizing modern cloud infrastructure and native development frameworks.
+## 📖 Overview
 
-
-
-Core Infrastructure & Tech Stack
-
-The Kairos platform is divided into three primary components, each handling a specific domain of the application ecosystem:
-
-1. The Native iOS Application (.swift)
-
-
-
-Purpose: The primary mobile touchpoint for users, built specifically for the Apple ecosystem.
-
-Architecture: By writing the application in native Swift, Kairos prioritizes high performance, fluid UI/UX, and deep integration with iOS system capabilities (such as push notifications, local storage, or hardware sensors) that cross-platform frameworks often struggle to match.
-
-2. The Web Platform & Backend (.web)
-
-
-
-Purpose: This repository acts as the central hub for the web application, frontend architecture, and the primary backend infrastructure.
-
-Infrastructure & Hosting (Vercel): The frontend and website structure are deployed via Vercel, suggesting a modern, serverless architecture (likely built with React/Next.js or a similar TypeScript framework). This allows for edge network distribution, fast load times, and seamless continuous deployment.
-
-Database & Backend (Supabase): Kairos utilizes Supabase as its backend-as-a-service (BaaS). This open-source Firebase alternative relies on a robust PostgreSQL database, handling data persistence, user authentication, and real-time data subscriptions. This setup allows the web and iOS apps to seamlessly sync state and user data.
-
-3. Organization Management & Documentation (.github)
-
-
-
-Purpose: The administrative and documentary backbone of the project.
-
-Contents: Instead of cluttering the main codebases, this repository centrally manages the project's foundational documents. It houses the global README, project requirements (req.txt), dependency tracking, and likely the overarching GitHub Actions workflows or issue templates. This structure is common in well-organized teams to maintain clean code repositories while ensuring documentation is easily accessible.
-
-Development Team
-
-The project is driven by developers boazwhealy and jrdurham23, who are utilizing this decoupled architecture to allow independent scaling and deployment of the mobile app, web app, and backend services.
-
-
-
-Summary of the Kairos Stack
-
-Mobile: Native iOS (Swift)
-
-Web/Frontend: TypeScript, deployed via Vercel (Serverless/Edge)
-
-Database & Auth: Supabase (PostgreSQL)
-
-Version Control & CI/CD: GitHub (Modular repository structure)
-
-Here is the text formatted into a clean, well-structured README file ready for GitHub:
-
-Kairos
-A modern software company building a cross-platform digital product ecosystem.
-
-By separating our codebase into distinct, purpose-built repositories, the Kairos engineering team has established a modular, scalable architecture utilizing modern cloud infrastructure and native development frameworks.
-
-🏗 Core Architecture & Repositories
-The Kairos platform is divided into three primary components, each handling a specific domain of the application ecosystem:
-
-1. kairos.swift (Native iOS Application)
-Purpose: The primary mobile touchpoint for users, built specifically for the Apple ecosystem.
-
-Architecture: Written in native Swift to prioritize high performance, fluid UI/UX, and deep integration with iOS system capabilities (such as push notifications, local storage, and hardware sensors) that cross-platform frameworks often struggle to match.
-
-2. kairos.web (Web Platform & Backend)
-Purpose: The central hub for the web application, frontend architecture, and the primary backend infrastructure.
-
-Infrastructure & Hosting (Vercel): The frontend and website structure are deployed via Vercel for a modern, serverless architecture. This enables edge network distribution, fast load times, and seamless continuous deployment.
-
-Database & Backend (Supabase): Kairos utilizes Supabase as its backend-as-a-service (BaaS). Powered by a robust PostgreSQL database, it handles data persistence, user authentication, and real-time data subscriptions—allowing the web and iOS apps to seamlessly sync state and user data.
-
-3. .github (Organization Management & Documentation)
-Purpose: The administrative and documentary backbone of the project.
-
-Contents: Instead of cluttering the main codebases, this repository centrally manages foundational documents. It houses this global README, project requirements (req.txt), dependency tracking, and overarching GitHub Actions workflows or issue templates. This structure maintains clean code repositories while ensuring documentation is easily accessible.
-
-💻 Tech Stack Overview
-Domain	Technology
-Mobile	Native iOS (Swift)
-Web / Frontend	TypeScript, deployed via Vercel (Serverless/Edge)
-Database & Auth	Supabase (PostgreSQL)
-Version Control & CI/CD	GitHub (Modular repository structure)
-👨‍💻 Development Team
-This project is driven by developers @boazwhealy and @jrdurham23. The decoupled architecture allows our team to independently scale, test, and deploy the mobile app, web app, and backend services with maximum efficiency.
-
-turn it into markdown
-
-Here is the raw Markdown file for the README so you can easily copy, paste, or download it.
-Kairos README
-Jul 8, 9:46 PM
-
-Let me know if you need any adjustments to the layout or want to add badges (like build status or version numbers) to the top!
-
-make sure it is a README.md
-
-Your Markdown file is ready
-MD icon
-README
- MD 
-Open
-
-I've generated the README.md file for you to download. Let me know if you need any adjustments or additional sections added to it!
-
-
-
-
-Gemini is AI and can make mistakes.
-
-# Kairos
-
-> A modern software company building a cross-platform digital product ecosystem.
-
-By separating our codebase into distinct, purpose-built repositories, the Kairos engineering team has established a modular, scalable architecture utilizing modern cloud infrastructure and native development frameworks.
+**Kairos** is a native Swift/SwiftUI application designed for firefighters, medical professionals, law enforcement officers, industrial workers, transportation crews, and hospitality staff who work rotating shift schedules. It provides an at-a-glance dashboard showing your current duty status, a full calendar view with day-level override controls, schedule sharing via one-time access codes, encrypted backup/recovery, and a companion watchOS app — all wrapped in a dark, premium UI with Liquid Glass effects.
 
 ---
 
 ## 🏗 Core Architecture & Repositories
 
-The Kairos platform is divided into three primary components, each handling a specific domain of the application ecosystem:
+The Kairos platform is divided into purpose-built repositories, each handling a specific domain:
 
-### 1. `kairos.swift` (Native iOS Application)
+### [`swift`](https://github.com/Kairos-LLC/.swift) — Native iOS Application
 * **Purpose:** The primary mobile touchpoint for users, built specifically for the Apple ecosystem.
-* **Architecture:** Written in native **Swift** to prioritize high performance, fluid UI/UX, and deep integration with iOS system capabilities (such as push notifications, local storage, and hardware sensors) that cross-platform frameworks often struggle to match.
+* **Architecture:** Written in native **Swift/SwiftUI** to deliver high performance, fluid UI/UX, and deep integration with iOS system capabilities including WidgetKit, watchOS, and Liquid Glass effects.
 
-### 2. `kairos.web` (Web Platform & Backend)
-* **Purpose:** The central hub for the web application, frontend architecture, and the primary backend infrastructure.
-* **Infrastructure & Hosting (Vercel):** The frontend and website structure are deployed via **Vercel** for a modern, serverless architecture. This enables edge network distribution, fast load times, and seamless continuous deployment.
-* **Database & Backend (Supabase):** Kairos utilizes **Supabase** as its backend-as-a-service (BaaS). Powered by a robust PostgreSQL database, it handles data persistence, user authentication, and real-time data subscriptions—allowing the web and iOS apps to seamlessly sync state and user data.
+### [`web`](https://github.com/Kairos-LLC/.web) — Web Platform & Backend
+* **Purpose:** The central hub for the [kairosapp.dev](https://kairosapp.dev) web application and backend infrastructure.
+* **Infrastructure & Hosting (Vercel):** Deployed via **Vercel** for serverless edge distribution, fast load times, and seamless continuous deployment.
+* **Database & Backend (Supabase):** Powered by **Supabase** (PostgreSQL) for data persistence, user authentication, and real-time data subscriptions.
 
-### 3. `.github` (Organization Management & Documentation)
-* **Purpose:** The administrative and documentary backbone of the project.
-* **Contents:** Instead of cluttering the main codebases, this repository centrally manages foundational documents. It houses this global README, project requirements (`req.txt`), dependency tracking, and overarching GitHub Actions workflows or issue templates. This structure maintains clean code repositories while ensuring documentation is easily accessible.
+### [`.github`](https://github.com/Kairos-LLC/.github) — Organization Management & Documentation
+* **Purpose:** The administrative backbone housing this org profile README, project requirements, and shared configuration.
 
 ---
 
-## 💻 Tech Stack Overview
+## ✨ Key Features
+
+| Feature | Description |
+| :--- | :--- |
+| 🔥 **Dashboard** | Real-time duty status with dynamic Liquid Glass ring, countdown badge, and adaptive iPhone/iPad layout |
+| 📅 **Calendar** | Full month grid with color-coded days and tap-to-override controls (vacation, extra shift, on call) |
+| 🔗 **Schedule Sharing** | Generate 6-character access codes to share your schedule read-only with coworkers |
+| 🔐 **Backup & Recovery** | AES-256-GCM encrypted recovery keys for full schedule restore across devices |
+| 🎯 **Onboarding** | Guided setup with job role selection, 10 preset rotation patterns, and custom week builder |
+| ⌚ **Apple Watch** | Companion app with progress ring, 7-day shift forecast, calendar, and settings |
+| 📱 **Home Screen Widget** | Small, Medium, and Large widgets with configurable schedule selection via App Intents |
+
+---
+
+## 💻 Tech Stack
 
 | Domain | Technology |
 | :--- | :--- |
-| **Mobile** | Native iOS (Swift) |
+| **Mobile** | Native iOS/iPadOS (Swift 5, SwiftUI, Liquid Glass) |
+| **Watch** | Native watchOS (SwiftUI) |
+| **Widgets** | WidgetKit with App Intents |
 | **Web / Frontend** | TypeScript, deployed via Vercel (Serverless/Edge) |
 | **Database & Auth** | Supabase (PostgreSQL) |
+| **Encryption** | Apple CryptoKit (AES-256-GCM) |
 | **Version Control & CI/CD** | GitHub (Modular repository structure) |
 
 ---
 
 ## 👨‍💻 Development Team
 
-This project is driven by developers **@boazwhealy** and **@jrdurham23**. The decoupled architecture allows our team to independently scale, test, and deploy the mobile app, web app, and backend services with maximum efficiency.
-README.md
-Displaying README.md.
+This project is driven by developers **[@boazwhealy](https://github.com/boazwhealy)** and **[@jrdurham23](https://github.com/jrdurham23)**. The decoupled architecture allows our team to independently scale, test, and deploy the mobile app, web app, and backend services with maximum efficiency.
+
+---
+
+<p align="center">
+  <a href="https://kairosapp.dev"><strong>kairosapp.dev</strong></a>
+  <br/>
+  <strong>Kairos</strong> — Taking the guesswork out of shift work.
+</p>
