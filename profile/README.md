@@ -52,6 +52,7 @@ The Kairos platform is divided into purpose-built repositories, each handling a 
 | 🎯 **Onboarding** | Guided setup with job role selection, 10 preset rotation patterns, and custom week builder |
 | ⌚ **Apple Watch** | Companion app with progress ring, 7-day shift forecast, calendar, and settings |
 | 📱 **Home Screen Widget** | Small, Medium, and Large widgets with configurable schedule selection via App Intents |
+| 👑 **Kairos Pro** | Monthly & yearly premium tier (20% discount) unlocking Apple Watch companion access and unlimited shared coworker schedules |
 
 ---
 
@@ -64,6 +65,7 @@ The Kairos platform is divided into purpose-built repositories, each handling a 
 | **Widgets** | WidgetKit with App Intents |
 | **Web / Frontend** | TypeScript, deployed via Vercel (Serverless/Edge) |
 | **Database & Auth** | Supabase (PostgreSQL) |
+| **Monetization**| StoreKit 2 (Auto-renewing subscriptions with App Group cross-target syncing) |
 | **Encryption** | Apple CryptoKit (AES-256-GCM) |
 | **Version Control & CI/CD** | GitHub (Modular repository structure) |
 
